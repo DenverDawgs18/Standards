@@ -40,6 +40,25 @@
     color-scheme: dark;
   }
 }
+:root[data-theme="dark"] {
+  --page: #0d0d0d;
+  --surface: #1a1a19;
+  --surface-2: #232321;
+  --ink: #f0efec;
+  --ink-2: #c3c2b7;
+  --ink-3: #9a998f;
+  --line: #2c2c2a;
+  --axis: #383835;
+  --accent: #3987e5;
+  --good-text: #4cc94c;
+  --warning-text: #fab219;
+  --critical-text: #f07070;
+  --unknown: #75746e;
+  --unknown-text: #c3c2b7;
+  --shadow: none;
+  color-scheme: dark;
+}
+
 
 * { box-sizing: border-box; }
 body {
@@ -55,7 +74,7 @@ h3 { font-size: 15px; }
 code { font: 12.5px ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--surface-2); padding: 1px 5px; border-radius: 4px; }
 .muted { color: var(--ink-2); }
 .small { font-size: 13px; }
-.app { max-width: 1200px; margin: 0 auto; padding: 0 16px 40px; }
+.app { max-width: 1200px; margin: 0 auto; padding-block: 0 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 
 /* top bar */
 .topbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding: 18px 0; border-bottom: 1px solid var(--line); margin-bottom: 24px; }
@@ -73,7 +92,7 @@ code { font: 12.5px ui-monospace, SFMono-Regular, Menlo, monospace; background: 
 .btn:hover { border-color: var(--axis); }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
 select, input[type="search"] { font: inherit; font-size: 14px; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; min-width: 0; }
-.row { display: flex; gap: 8px; flex-wrap: wrap; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 button:focus-visible, select:focus-visible, input:focus-visible, summary:focus-visible, .dropzone:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* import */
@@ -110,7 +129,7 @@ button:focus-visible, select:focus-visible, input:focus-visible, summary:focus-v
 .verdict-icon { width: 46px; height: 46px; flex: none; border-radius: 50%; background: var(--v); color: #fff; display: grid; place-items: center; font-size: 22px; font-weight: 800; }
 .verdict-text { flex: 1 1 320px; }
 .verdict-text p { margin: 2px 0; }
-.verdict-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.verdict-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .notes { margin: 12px 0 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; font-size: 14px; }
 .notes summary { cursor: pointer; }
 .notes ul { margin: 8px 0 0; padding-left: 20px; color: var(--ink-2); }

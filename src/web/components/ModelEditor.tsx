@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { normalizeModel, type BuildingModel } from "../../shared/model";
+import { STANDALONE, copyText } from "../env";
 
 export function ModelEditor({ model, onApply }: { model: BuildingModel; onApply: (m: BuildingModel) => void }) {
   const [text, setText] = useState(() => JSON.stringify(model, null, 2));
   const [errors, setErrors] = useState<string[]>([]);
+  const [copied, setCopied] = useState<string | null>(null);
 
   function apply() {
     let json: unknown;
@@ -41,9 +43,15 @@ export function ModelEditor({ model, onApply }: { model: BuildingModel; onApply:
           </p>
         </div>
         <div className="row">
-          <button className="btn" onClick={download}>
-            Download JSON
+          {copied && <span className="muted small" role="status">{copied}</span>}
+          <button className="btn" onClick={async () => setCopied((await copyText(text)) ? "Copied" : "Copy blocked by the browser")}>
+            Copy JSON
           </button>
+          {!STANDALONE && (
+            <button className="btn" onClick={download}>
+              Download JSON
+            </button>
+          )}
           <button className="btn primary" onClick={apply}>
             Apply &amp; re-check
           </button>

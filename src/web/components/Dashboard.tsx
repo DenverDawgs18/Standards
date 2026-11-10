@@ -3,6 +3,7 @@ import { SOURCES } from "../../shared/criteria";
 import { SEVERITY_ORDER } from "../../shared/engine";
 import type { Category, Finding, Report, Severity, Status } from "../../shared/types";
 import type { LoadedModel } from "../App";
+import { STANDALONE, copyText } from "../env";
 
 export const STATUS_META: Record<Status, { label: string; icon: string; cls: string }> = {
   fail: { label: "Fails", icon: "✕", cls: "s-fail" },
@@ -23,6 +24,7 @@ export function Dashboard({ report, loaded, onEditModel }: { report: Report; loa
   const [categoryFilter, setCategoryFilter] = useState<Category | "all">("all");
   const [severityFilter, setSeverityFilter] = useState<Severity | "all">("all");
   const [query, setQuery] = useState("");
+  const [copied, setCopied] = useState<string | null>(null);
 
   const categories = useMemo(() => groupByCategory(report.findings), [report]);
   const sheets = useMemo(() => groupBySheet(report.findings), [report]);
@@ -58,12 +60,23 @@ export function Dashboard({ report, loaded, onEditModel }: { report: Report; loa
           <button className="btn" onClick={onEditModel}>
             Edit model
           </button>
-          <button className="btn" onClick={() => downloadReport(report)}>
-            Export report
+          <button
+            className="btn"
+            onClick={async () => setCopied((await copyText(JSON.stringify(report, null, 2))) ? "Report copied" : "Copy blocked by the browser")}
+          >
+            Copy report JSON
           </button>
-          <button className="btn" onClick={() => window.print()}>
-            Print
-          </button>
+          {!STANDALONE && (
+            <>
+              <button className="btn" onClick={() => downloadReport(report)}>
+                Export report
+              </button>
+              <button className="btn" onClick={() => window.print()}>
+                Print
+              </button>
+            </>
+          )}
+          {copied && <span className="muted small" role="status">{copied}</span>}
         </div>
       </div>
 

@@ -9,7 +9,8 @@
     "build": "tsc --noEmit && vite build",
     "start": "NODE_ENV=production tsx server/index.ts",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build:standalone": "mkdir -p dist-standalone && node scripts/build-standalone.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",

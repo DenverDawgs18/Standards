@@ -2,11 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import { parseIfc } from "../../shared/importers/ifc";
 import { normalizeModel } from "../../shared/model";
 import type { LoadedModel } from "../App";
+import { STANDALONE } from "../env";
+import distributionCenter from "../../../samples/distribution-center.json?raw";
+import officeCompliant from "../../../samples/office-compliant.json?raw";
+import smallPlant from "../../../samples/small-plant.ifc?raw";
 
 const SAMPLES = [
-  { file: "distribution-center.json", label: "Distribution center", hint: "Warehouse with ESFR racks — many issues" },
-  { file: "office-compliant.json", label: "Office building", hint: "Fully compliant example" },
-  { file: "small-plant.ifc", label: "Small plant (IFC)", hint: "BIM model import" },
+  { file: "distribution-center.json", text: distributionCenter, label: "Distribution center", hint: "Warehouse with ESFR racks — many issues" },
+  { file: "office-compliant.json", text: officeCompliant, label: "Office building", hint: "Fully compliant example" },
+  { file: "small-plant.ifc", text: smallPlant, label: "Small plant (IFC)", hint: "BIM model import" },
 ];
 
 const DRAWING_TYPES = ["application/pdf", "image/png", "image/jpeg", "image/gif", "image/webp"];
@@ -19,6 +23,10 @@ export function ImportPanel({ onLoaded }: { onLoaded: (l: LoadedModel) => void }
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    if (STANDALONE) {
+      setAiAvailable(false);
+      return;
+    }
     fetch("/api/health")
       .then((r) => r.json())
       .then((j) => setAiAvailable(Boolean(j.blueprintExtraction)))
@@ -33,7 +41,10 @@ export function ImportPanel({ onLoaded }: { onLoaded: (l: LoadedModel) => void }
       const drawings = files.filter((f) => DRAWING_TYPES.includes(f.type));
       const others = files.filter((f) => !DRAWING_TYPES.includes(f.type));
       if (drawings.length && others.length) throw new Error("Upload drawings (PDF/images) separately from model files (JSON/IFC).");
-      if (drawings.length) return await readDrawings(drawings);
+      if (drawings.length) {
+        if (STANDALONE) throw new Error("Reading blueprints needs the app's server (npm start with ANTHROPIC_API_KEY set). JSON and IFC files work here.");
+        return await readDrawings(drawings);
+      }
       if (others.length > 1) throw new Error("Upload one model file at a time.");
       await readModelFile(others[0].name, await others[0].text());
     } catch (e) {
@@ -85,13 +96,10 @@ export function ImportPanel({ onLoaded }: { onLoaded: (l: LoadedModel) => void }
     });
   }
 
-  async function loadSample(file: string) {
+  async function loadSample(file: string, text: string) {
     setError(null);
-    setBusy(`Loading ${file}…`);
     try {
-      const res = await fetch(`/${file}`);
-      if (!res.ok) throw new Error(`Could not load sample ${file}.`);
-      await readModelFile(file, await res.text());
+      await readModelFile(file, text);
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -140,7 +148,11 @@ export function ImportPanel({ onLoaded }: { onLoaded: (l: LoadedModel) => void }
           Plans, fire protection sheets, door schedules and design-basis tables are read by Claude and turned into a building model. Anything not on the drawings is left blank for you to fill in.
           {aiAvailable === false && (
             <p className="note warn">
-              Not configured on this server: set <code>ANTHROPIC_API_KEY</code> and restart to enable.
+              {STANDALONE ? (
+                <>Not available in this hosted copy. Run the app's server with <code>ANTHROPIC_API_KEY</code> set to use it.</>
+              ) : (
+                <>Not configured on this server: set <code>ANTHROPIC_API_KEY</code> and restart to enable.</>
+              )}
             </p>
           )}
         </ImportCard>
@@ -155,7 +167,7 @@ export function ImportPanel({ onLoaded }: { onLoaded: (l: LoadedModel) => void }
       <h3 className="section-title">Or try a sample</h3>
       <div className="samples">
         {SAMPLES.map((s) => (
-          <button key={s.file} className="sample" onClick={() => loadSample(s.file)} disabled={!!busy}>
+          <button key={s.file} className="sample" onClick={() => loadSample(s.file, s.text)} disabled={!!busy}>
             <strong>{s.label}</strong>
             <span className="muted small">{s.hint}</span>
           </button>
