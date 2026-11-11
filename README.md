@@ -32,6 +32,20 @@ To read blueprints, set `ANTHROPIC_API_KEY` in the server's environment (optiona
 npm test             # rules engine + IFC importer tests
 ```
 
+## Deploying (Fly.io)
+
+`fly.toml` runs one `shared-cpu-1x` machine that scales to zero: Fly stops it when idle and starts it on the next request, so the first request after a quiet spell takes a few seconds.
+
+```bash
+fly deploy --ha=false
+```
+
+To enable blueprint reading on the deployed app:
+
+```bash
+fly secrets set ANTHROPIC_API_KEY=your-key
+```
+
 ## What it checks
 
 | Data sheet | Check |
