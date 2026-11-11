@@ -32,7 +32,7 @@ export function App() {
           </span>
           <div>
             <h1>FM Standards Checker</h1>
-            <p className="muted small">Building models &amp; drawings vs. FM Property Loss Prevention Data Sheets</p>
+            <p className="muted small">Building models vs. FM Property Loss Prevention Data Sheets</p>
           </div>
         </div>
         <nav className="tabs" role="tablist">

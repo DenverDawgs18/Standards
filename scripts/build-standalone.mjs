@@ -1,5 +1,5 @@
 // Builds the app as one self-contained HTML file (no server), for hosting as a
-// static page. Blueprint reading is disabled in this build; JSON and IFC work.
+// static page.
 // Usage: node scripts/build-standalone.mjs [output.html]
 import { build } from "vite";
 import { mkdtempSync, readFileSync, readdirSync, writeFileSync, rmSync } from "node:fs";

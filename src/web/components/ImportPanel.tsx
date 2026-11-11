@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { parseIfc } from "../../shared/importers/ifc";
 import { normalizeModel } from "../../shared/model";
 import type { LoadedModel } from "../App";
-import { STANDALONE } from "../env";
 import distributionCenter from "../../../samples/distribution-center.json?raw";
 import officeCompliant from "../../../samples/office-compliant.json?raw";
 import smallPlant from "../../../samples/small-plant.ifc?raw";
@@ -13,40 +12,21 @@ const SAMPLES = [
   { file: "small-plant.ifc", text: smallPlant, label: "Small plant (IFC)", hint: "BIM model import" },
 ];
 
-const DRAWING_TYPES = ["application/pdf", "image/png", "image/jpeg", "image/gif", "image/webp"];
-
 export function ImportPanel({ onLoaded }: { onLoaded: (l: LoadedModel) => void }) {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
-  const [aiAvailable, setAiAvailable] = useState<boolean | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (STANDALONE) {
-      setAiAvailable(false);
-      return;
-    }
-    fetch("/api/health")
-      .then((r) => r.json())
-      .then((j) => setAiAvailable(Boolean(j.blueprintExtraction)))
-      .catch(() => setAiAvailable(false));
-  }, []);
 
   async function handleFiles(list: FileList | File[]) {
     const files = [...list];
     if (!files.length) return;
     setError(null);
     try {
-      const drawings = files.filter((f) => DRAWING_TYPES.includes(f.type));
-      const others = files.filter((f) => !DRAWING_TYPES.includes(f.type));
-      if (drawings.length && others.length) throw new Error("Upload drawings (PDF/images) separately from model files (JSON/IFC).");
-      if (drawings.length) {
-        if (STANDALONE) throw new Error("Reading blueprints needs the app's server (npm start with ANTHROPIC_API_KEY set). JSON and IFC files work here.");
-        return await readDrawings(drawings);
-      }
-      if (others.length > 1) throw new Error("Upload one model file at a time.");
-      await readModelFile(others[0].name, await others[0].text());
+      if (files.length > 1) throw new Error("Upload one model file at a time.");
+      const file = files[0];
+      if (!/\.(json|ifc)$/i.test(file.name)) throw new Error(`${file.name} isn't a supported file. Upload a building model as .json or .ifc.`);
+      await readModelFile(file.name, await file.text());
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -73,27 +53,6 @@ export function ImportPanel({ onLoaded }: { onLoaded: (l: LoadedModel) => void }
     }
     const { model, issues } = normalizeModel(json);
     onLoaded({ model, source: name, notes: issues.map((i) => `Schema: ${i}`) });
-  }
-
-  async function readDrawings(files: File[]) {
-    const totalMb = files.reduce((s, f) => s + f.size, 0) / 1e6;
-    if (totalMb > 30) throw new Error(`Drawings total ${totalMb.toFixed(1)} MB; upload at most 30 MB at a time.`);
-    setBusy(`Reading ${files.length} drawing sheet${files.length > 1 ? "s" : ""} with Claude… this can take a minute or two.`);
-    const payload = await Promise.all(
-      files.map(async (f) => ({ fileName: f.name, mediaType: f.type, data: await toBase64(f) })),
-    );
-    const res = await fetch("/api/extract", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ files: payload }) });
-    const body = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(body.error ?? `Extraction failed (${res.status}).`);
-    onLoaded({
-      model: body.model,
-      source: files.map((f) => f.name).join(", "),
-      notes: [
-        "Extracted by AI from drawings — verify each value on the Model tab before relying on the results.",
-        ...(body.notes ?? []),
-        ...(body.issues ?? []).map((i: string) => `Schema: ${i}`),
-      ],
-    });
   }
 
   async function loadSample(file: string, text: string) {
@@ -130,37 +89,24 @@ export function ImportPanel({ onLoaded }: { onLoaded: (l: LoadedModel) => void }
           ref={inputRef}
           type="file"
           hidden
-          multiple
-          accept=".json,.ifc,.pdf,.png,.jpg,.jpeg,.gif,.webp"
+          accept=".json,.ifc"
           onChange={(e) => e.target.files && handleFiles(e.target.files)}
         />
         <div className="drop-icon" aria-hidden>
           ⬆
         </div>
-        <h2>Drop blueprints or a building model</h2>
-        <p className="muted">or click to choose files</p>
+        <h2>Drop a building model</h2>
+        <p className="muted">IFC or JSON — or click to choose a file</p>
         {busy && <p className="busy" role="status">{busy}</p>}
         {error && <p className="error" role="alert">{error}</p>}
       </div>
 
       <div className="import-grid">
-        <ImportCard title="Blueprints / drawings" formats="PDF, PNG, JPEG">
-          Plans, fire protection sheets, door schedules and design-basis tables are read by Claude and turned into a building model. Anything not on the drawings is left blank for you to fill in.
-          {aiAvailable === false && (
-            <p className="note warn">
-              {STANDALONE ? (
-                <>Not available in this hosted copy. Run the app's server with <code>ANTHROPIC_API_KEY</code> set to use it.</>
-              ) : (
-                <>Not configured on this server: set <code>ANTHROPIC_API_KEY</code> and restart to enable.</>
-              )}
-            </p>
-          )}
-        </ImportCard>
         <ImportCard title="BIM model" formats="IFC 2x3 / IFC4">
           Reads spaces, areas, heights, fire ratings of walls and doors, sprinkler terminals, roof ratings and transformers from standard property sets.
         </ImportCard>
         <ImportCard title="Building model JSON" formats=".json">
-          The checker's own format. Missing keys are treated as unknown. Download one from the Model tab to use as a template.
+          The checker's own format. Missing keys are treated as unknown. Copy one from the Model tab to use as a template.
         </ImportCard>
       </div>
 
@@ -189,11 +135,3 @@ function ImportCard({ title, formats, children }: { title: string; formats: stri
   );
 }
 
-function toBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = () => resolve(String(r.result).split(",")[1] ?? "");
-    r.onerror = () => reject(r.error);
-    r.readAsDataURL(file);
-  });
-}

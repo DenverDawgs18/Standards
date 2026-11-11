@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 /**
- * The building model every importer (JSON, IFC, blueprint extraction) produces
+ * The building model every importer (JSON, IFC) produces
  * and the rules engine consumes.
  *
  * Units are US customary (ft, ft², gpm, psi, psf, mph, °F, gal) because the

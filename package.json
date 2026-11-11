@@ -2,7 +2,7 @@
   "name": "fm-standards-checker",
   "version": "0.1.0",
   "private": true,
-  "description": "Check a building model or blueprint against FM Property Loss Prevention Data Sheet criteria and show a compliance dashboard.",
+  "description": "Check a building model against FM Property Loss Prevention Data Sheet criteria and show a compliance dashboard.",
   "type": "module",
   "scripts": {
     "dev": "concurrently -k -n api,web \"tsx watch server/index.ts\" \"vite\"",
@@ -13,7 +13,6 @@
     "build:standalone": "mkdir -p dist-standalone && node scripts/build-standalone.mjs"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^1.8.0",
     "express": "^5.3.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",

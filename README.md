@@ -6,7 +6,6 @@ You can give it:
 
 | Input | How it's read |
 |---|---|
-| **Blueprints / drawings** (PDF, PNG, JPEG, GIF, WebP) | Sent to Claude (`claude-opus-5-5`), which pulls out facts the drawings state (sprinkler design basis, fire wall and door ratings, flow test, roof rating…) and leaves everything else blank. Needs `ANTHROPIC_API_KEY` on the server. |
 | **BIM model** (IFC 2x3 / IFC4 `.ifc`) | Parsed in the browser: spaces, floor areas, heights, `Pset_SpaceFireSafetyRequirements`, wall and door `FireRating`, sprinkler terminals, roof ratings, transformers. |
 | **Building model JSON** | The app's own format (`src/shared/model.ts`). Missing keys are treated as unknown. |
 
@@ -26,8 +25,6 @@ npm run dev          # API on :8787 and Vite on :5173
 npm run build && npm start   # production: one server on :8787 (PORT to change)
 ```
 
-To read blueprints, set `ANTHROPIC_API_KEY` in the server's environment (optionally `CLAUDE_MODEL`). JSON and IFC imports work without it.
-
 ```bash
 npm test             # rules engine + IFC importer tests
 ```
@@ -38,12 +35,6 @@ npm test             # rules engine + IFC importer tests
 
 ```bash
 fly deploy --ha=false
-```
-
-To enable blueprint reading on the deployed app:
-
-```bash
-fly secrets set ANTHROPIC_API_KEY=your-key
 ```
 
 ## What it checks
@@ -90,7 +81,7 @@ src/shared/criteria.ts       numeric criteria per data sheet + source/edition st
 src/shared/rules/*.ts        the checks
 src/shared/engine.ts         runs checks, scores, verdict
 src/shared/importers/ifc.ts  IFC STEP reader
-server/                      Express server + Claude blueprint extraction
+server/                      Express server (serves the built app)
 src/web/                     React dashboard
 samples/                     example JSON and IFC models
 tests/                       vitest
