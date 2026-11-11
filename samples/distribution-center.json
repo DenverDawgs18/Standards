@@ -1,0 +1,149 @@
+{
+  "name": "Riverside Distribution Center (sample)",
+  "site": {
+    "designWindSpeed_mph": 130,
+    "windExposure": "C",
+    "groundSnowLoad_psf": 25,
+    "hailZone": "severe",
+    "earthquakeZone": "100-yr",
+    "floodZone": "500-yr",
+    "designFloodElevation_ft": 412.0
+  },
+  "construction": {
+    "stories": 1,
+    "roofHeight_ft": 42,
+    "exteriorWalls": { "material": "insulated-metal-panel", "combustibleInsulation": true, "fmApproved": false },
+    "roof": {
+      "deckType": "steel",
+      "fmApprovedAssembly": true,
+      "windRatingClass": 60,
+      "hailRating": "MH",
+      "designSnowLoad_psf": 20,
+      "combustibleInsulation": true
+    },
+    "concealedSpaces": { "combustible": false, "sprinklered": null }
+  },
+  "areas": [
+    {
+      "id": "wh",
+      "name": "Warehouse (racks)",
+      "occupancy": "warehouse",
+      "hazardCategory": "HC-3",
+      "floorArea_ft2": 180000,
+      "ceilingHeight_ft": 40,
+      "sprinklered": true,
+      "sprinkler": {
+        "systemType": "dry",
+        "sprinklerType": "esfr",
+        "kFactor": 25.2,
+        "temperatureRating_F": 165,
+        "maxSpacing_ft": 11,
+        "minSpacing_ft": 8,
+        "maxCoveragePerSprinkler_ft2": 100,
+        "designDensity_gpm_ft2": null,
+        "designArea_ft2": null,
+        "deflectorToTopOfStorage_ft": 2
+      },
+      "storage": { "arrangement": "rack", "height_ft": 35, "commodity": "cartoned-unexpanded-plastic", "inRackSprinklers": false },
+      "ignitableLiquids": null,
+      "smokeDetection": false
+    },
+    {
+      "id": "office",
+      "name": "Office block",
+      "occupancy": "office",
+      "hazardCategory": "HC-1",
+      "floorArea_ft2": 12000,
+      "ceilingHeight_ft": 10,
+      "sprinklered": true,
+      "sprinkler": {
+        "systemType": "wet",
+        "sprinklerType": "standard-spray",
+        "kFactor": 5.6,
+        "temperatureRating_F": 155,
+        "maxSpacing_ft": 15,
+        "minSpacing_ft": 7,
+        "maxCoveragePerSprinkler_ft2": 196,
+        "designDensity_gpm_ft2": 0.1,
+        "designArea_ft2": 1500,
+        "deflectorToTopOfStorage_ft": null
+      },
+      "storage": null,
+      "ignitableLiquids": null,
+      "smokeDetection": true
+    },
+    {
+      "id": "maint",
+      "name": "Maintenance shop",
+      "occupancy": "manufacturing",
+      "hazardCategory": "HC-2",
+      "floorArea_ft2": 6000,
+      "ceilingHeight_ft": 24,
+      "sprinklered": true,
+      "sprinkler": {
+        "systemType": "wet",
+        "sprinklerType": "standard-spray",
+        "kFactor": 8.0,
+        "temperatureRating_F": 165,
+        "maxSpacing_ft": 14,
+        "minSpacing_ft": 8,
+        "maxCoveragePerSprinkler_ft2": 144,
+        "designDensity_gpm_ft2": 0.15,
+        "designArea_ft2": 2500,
+        "deflectorToTopOfStorage_ft": null
+      },
+      "storage": null,
+      "ignitableLiquids": { "quantity_gal": 400, "cutoffRoom": false, "cutoffRating_hr": null, "spillContainment": false },
+      "smokeDetection": false
+    },
+    {
+      "id": "battery",
+      "name": "Forklift battery charging",
+      "occupancy": "other",
+      "hazardCategory": "HC-2",
+      "floorArea_ft2": 2000,
+      "ceilingHeight_ft": 24,
+      "sprinklered": false,
+      "sprinkler": null,
+      "storage": null,
+      "ignitableLiquids": null,
+      "smokeDetection": false
+    }
+  ],
+  "fireWalls": [
+    {
+      "id": "fw-1",
+      "name": "Warehouse / office fire wall",
+      "rating_hr": 3,
+      "separates": ["wh", "office"],
+      "openings": [
+        { "id": "D-104", "type": "door", "rating_hr": 3 },
+        { "id": "D-105", "type": "door", "rating_hr": 1.5 },
+        { "id": "P-1", "type": "penetration", "rating_hr": null }
+      ]
+    }
+  ],
+  "waterSupply": {
+    "availableFlow_gpm": 2400,
+    "residualPressure_psi": 72,
+    "requiredSystemPressure_psi": 88,
+    "duration_min": 60,
+    "firePumpPresent": true,
+    "firePumpFmApproved": true
+  },
+  "systems": {
+    "controlValvesSupervised": false,
+    "waterflowAlarm": true,
+    "centralStationMonitoring": false,
+    "sprinklerSeismicBracing": true,
+    "flexibleCouplings": false,
+    "smokeVentsPresent": true,
+    "smokeVentsAutomatic": true,
+    "smokeVentOperatingTemp_F": 165,
+    "extinguisherMaxTravel_ft": 70
+  },
+  "criticalEquipment": { "lowestElevation_ft": 410.5 },
+  "transformers": [
+    { "id": "tx-1", "name": "Utility pad-mount transformer", "fluid": "mineral-oil", "volume_gal": 650, "distanceToBuilding_ft": 12, "adjacentWall": "noncombustible" }
+  ]
+}
